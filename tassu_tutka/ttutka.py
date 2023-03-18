@@ -1,11 +1,11 @@
-import src.argparse as ap
+import tassu_tutka.argparse as ap
 
 def main():
     options = ap.parse()
     print(options)
     if options.gui:
         print("JEEJEE")
-        import src.gui as gui
+        import tassu_tutka.gui as gui
         gui.user_interface()
         return
 
