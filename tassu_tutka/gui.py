@@ -130,7 +130,7 @@ class MainWindow(ttk.Frame):
             self, text="Open Street map", command=self.set_normal_view
         ).grid(column=3, row=1, sticky="ew")
 
-        self.map = tkm.TkinterMapView(self, width=800, height=600, corner_radius=5)
+        self.map = tkm.TkinterMapView(self, width=1200, height=900)
         self.map.set_position(65.0612111, 25.4681883)
         self.map.grid(column=0, row=2, columnspan=4)
         self.grid()
