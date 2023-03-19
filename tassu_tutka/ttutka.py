@@ -4,7 +4,6 @@ def main():
     options = ap.parse()
     print(options)
     if options.gui:
-        print("JEEJEE")
         import tassu_tutka.gui as gui
         gui.user_interface()
         return

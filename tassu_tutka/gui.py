@@ -19,9 +19,9 @@ class MainWindow(ttk.Frame):
         self.grid()
 
         # Text showing selected file.
-        self.file_var = tkinter.StringVar(self)
-        self.file_var.set("Tiedostoa ei ole valittu")
-        file_label = ttk.Label(self, textvariable=self.file_var, border=5)
+        self.file_name = tkinter.StringVar(self)
+        self.file_name.set("Tiedostoa ei ole valittu")
+        file_label = ttk.Label(self, textvariable=self.file_name, border=5)
         file_label.grid(column=0, row=0, columnspan=4)
 
         # File types for open file dialog.
@@ -34,6 +34,7 @@ class MainWindow(ttk.Frame):
             self.file = filedialog.askopenfile(
                 title="Avaa tiedosto", initialdir="~", filetypes=ft
             )
+            self.file_name.set(self.file.name) if self.file else self.file_name.set("Tiedostoa ei ole valittu")
 
         # Them buttons
         read_file = ttk.Button(
