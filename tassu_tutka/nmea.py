@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Literal, Union, Dict
+from typing import Literal, Union, Dict, Any
 from abc import ABC
 import re
 import sys
@@ -61,7 +61,7 @@ class Sentence:
 
     def __init__(self, raw_sentence: str):
         self.raw = raw_sentence.strip()
-        self.sentence: dict = self._process(self.raw)
+        self.sentence: dict|None = self._process(self.raw)
 
     def _convert_gps_degrees_to_decimal(
             self,
@@ -78,7 +78,7 @@ class Sentence:
         deg *= mp
         return deg
     
-    def _process(self, raw: str) -> None:
+    def _process(self, raw: str) -> dict|None:
         ret = self._re.match(raw)
         if not ret:
             raise UnknownSentence("Didn't recognize the sentence.")
@@ -95,5 +95,5 @@ class Sentence:
             ret["MSG_LATTITUDAL_HEMISPHERE"])
         return ret
         
-    def __getitem__(self, item):
+    def __getitem__(self, item) -> Any:
         return self.sentence[item]

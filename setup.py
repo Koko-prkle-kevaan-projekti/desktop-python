@@ -6,7 +6,7 @@ def read(fname):
 
 setup(
     name = "TassuTutka",
-    version = "0.0.4",
+    version = "0.0.5",
     author = "Mikko Kujala",
     author_email = "m.kujala@live.com",
     description = ("TassuTutka -project's desktop app."),
