@@ -1,5 +1,5 @@
 import unittest
-import app.src.nmea as nmea
+import tassu_tutka.nmea as nmea
 import sys
 
 class TestNMEAMessages(unittest.TestCase):
