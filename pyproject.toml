@@ -4,46 +4,45 @@ build-backend = "setuptools.build_meta"
 
 [options]
 install_requires = [
-    certifi,
-    charset-normalizer,
-    click,
-    customtkinter,
-    darkdetect,
-    decorator,
-    future,
-    geocoder,
-    geojson,
-    idna,
-    mypy-extensions,
-    packaging,
-    pathspec,
-    Pillow,
-    platformdirs,
-    pyperclip,
-    ratelim,
-    requests,
-    six,
-    tkintermapview,
-    urllib3,
+    "certifi",
+    "charset-normalizer",
+    "click",
+    "customtkinter",
+    "darkdetect",
+    "decorator",
+    "future",
+    "geocoder",
+    "geojson",
+    "idna",
+    "mypy-extensions",
+    "packaging",
+    "pathspec",
+    "Pillow",
+    "platformdirs",
+    "pyperclip",
+    "ratelim",
+    "requests",
+    "six",
+    "tkintermapview",
+    "urllib3",
 ]
 
 [options.extras_require]
-dev =
-    black
+dev = "black"
 
 [options.entry_points]
-ttutka =
-    tassu_tutka.ttutka:main
+ttutka = ["tassu_tutka.ttutka:main"]
 
 [metadata]
-name = TassuTutka
-version = attr: example.__version__
-author = Mikko Kujala
-author_email = m.kujala@live.com
-url = https://github.com/Koko-prkle-kevaan-projekti/desktop-python
-description = TassuTutka-desktop on työpöytäsovellus TassuTutkaan eli koiran omaan GPS-sovellukseen.
-long_description = file: README.md
-long_description_content_type = text/markdown
-license = Unlicense
-classifiers =
-    Programming Language :: Python :: 3
+name = "TassuTutka"
+version = "attr: example.__version__"
+author = "Mikko Kujala"
+author_email = "m.kujala@live.com"
+url = "https://github.com/Koko-prkle-kevaan-projekti/desktop-python"
+description = "TassuTutka-desktop on työpöytäsovellus TassuTutkaan eli koiran omaan GPS-sovellukseen."
+long_description = "file: README.md"
+long_description_content_type = "text/markdown"
+license = "Unlicense"
+classifiers = [
+    "Programming Language :: Python :: 3"
+]
