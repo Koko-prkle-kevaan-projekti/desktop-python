@@ -12,7 +12,7 @@ setup(
     description = ("TassuTutka -project's desktop app."),
     license = "Unlicense",
     url = "https://github.com/Koko-prkle-kevaan-projekti/desktop-python.git",
-    packages=['tassu_tutka']
+    packages=['tassu_tutka',]
     entry_points = {
         "console_scripts": [
             "ttutka = tassu_tutka.ttutka:main"
@@ -49,4 +49,3 @@ setup(
         "License :: OSI Approved :: Unlicense",
     ],
 )
-
