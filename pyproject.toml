@@ -35,7 +35,7 @@ ttutka = "tassu_tutka.ttutka:main"
 
 [metadata]
 name = "TassuTutka"
-version = "attr: example.__version__"
+version = "0.0.6"
 author = "Mikko Kujala"
 author_email = "m.kujala@live.com"
 url = "https://github.com/Koko-prkle-kevaan-projekti/desktop-python"
