@@ -30,7 +30,7 @@ install_requires = [
 [options.extras_require]
 dev = ["black"]
 
-[project.scripts]
+[scripts]
 ttutka = "tassu_tutka.ttutka:main"
 
 [metadata]
