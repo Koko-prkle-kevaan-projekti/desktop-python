@@ -1,9 +1,20 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
-[options]
-install_requires = [
+[project]
+name = "tassu_tutka"
+authors = [
+    {name = "Mikko Kujala", email = "m.kujala@live.com"},
+]
+description = "Tassu Tutka desktop app. Some school project -.-'"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "Unlicense"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
     "certifi",
     "charset-normalizer",
     "click",
@@ -25,24 +36,9 @@ install_requires = [
     "six",
     "tkintermapview",
     "urllib3",
+    "black"
 ]
+dynamic = ["version"]
 
-[options.extras_require]
-dev = ["black"]
-
-[scripts]
-ttutka = "tassu_tutka.ttutka:main"
-
-[metadata]
-name = "TassuTutka"
-version = "0.0.6"
-author = "Mikko Kujala"
-author_email = "m.kujala@live.com"
-url = "https://github.com/Koko-prkle-kevaan-projekti/desktop-python"
-description = "TassuTutka-desktop on työpöytäsovellus TassuTutkaan eli koiran omaan GPS-sovellukseen."
-long_description = "file: README.md"
-long_description_content_type = "text/markdown"
-license = "Unlicense"
-classifiers = [
-    "Programming Language :: Python :: 3"
-]
+[project.scripts]
+ttutka = "tassu_tutka:ttutka:main"
