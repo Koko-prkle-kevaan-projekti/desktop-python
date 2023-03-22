@@ -3,28 +3,29 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [options]
-install_requires =
-    certifi
-    charset-normalizer
-    click
-    customtkinter
-    darkdetect
-    decorator
-    future
-    geocoder
-    geojson
-    idna
-    mypy-extensions
-    packaging
-    pathspec
-    Pillow
-    platformdirs
-    pyperclip
-    ratelim
-    requests
-    six
-    tkintermapview
-    urllib3
+install_requires = [
+    certifi,
+    charset-normalizer,
+    click,
+    customtkinter,
+    darkdetect,
+    decorator,
+    future,
+    geocoder,
+    geojson,
+    idna,
+    mypy-extensions,
+    packaging,
+    pathspec,
+    Pillow,
+    platformdirs,
+    pyperclip,
+    ratelim,
+    requests,
+    six,
+    tkintermapview,
+    urllib3,
+]
 
 [options.extras_require]
 dev =
