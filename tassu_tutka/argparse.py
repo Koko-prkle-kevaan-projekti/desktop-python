@@ -17,18 +17,9 @@ def parse() -> argparse.Namespace:
         help="Start server. Supports .env file for loading env vars.",
     )
     server_cmd.add_argument(
-        "--port",
-        nargs=1,
-        action="store",
-        help="Port to listen to. Use environment variable TT_BIND_PORT if absent, or default to 65000",
-        default=65000
-    )
-    server_cmd.add_argument(
-        "--address",
-        nargs=1,
-        action="store",
-        help="Address to bind to. Use environment variable TT_BIND_ADDRESS if absent, or default to 0.0.0.0",
-        default="0.0.0.0"
+        "--daemon",
+        action="store_true",
+        help="Daemonize the server",
     )
     client_cmd.add_argument(
         "--ofile",
