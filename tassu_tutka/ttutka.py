@@ -8,8 +8,8 @@ def main():
         gui.user_interface()
         return
     elif hasattr(options, "start") and options.start == "start":
-        import tassu_tutka.socket_server as sr
-        sr.start_server(options.address, options.port)
+        import tassu_tutka.server as sr
+        sr.serve()
 
 if __name__ == "__main__":
     main()
