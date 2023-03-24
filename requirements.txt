@@ -12,6 +12,7 @@ geocoder==1.38.1
 geojson==3.0.1
 h11==0.14.0
 idna==3.4
+lock==2018.3.25.2110
 mypy-extensions==1.0.0
 packaging==23.0
 pathspec==0.11.1

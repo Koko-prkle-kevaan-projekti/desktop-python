@@ -5,15 +5,12 @@ import socketserver
 import time
 import sys
 import functools
-import tempfile
 import platform
+import pathlib
+import lock
 import tassu_tutka.error as error
 
-TX_PORT = 65000
-RX_PORT = 64999
-
-BUF = ""
-BUF_LOCK = threading.Lock()
+_TX_PORT = 65000
 
 
 def _add_pid_to_pidfile(pid: int | None = None):
@@ -44,32 +41,21 @@ def _get_pids_from_pidfile():
 
 
 class RxHandler(socketserver.StreamRequestHandler):
+    buffer_file_path = pathlib.Path("/tmp/ttutka.tmp")
+
     def handle(self) -> None:
-        global BUF
+        if not self.buffer_file_path.exists():
+            self.buffer_file_path.touch(mode=0o600, exist_ok=False)
         while True:
+            # Write to locked file, if available.
             line = self.rfile.readline().decode("utf-8")
-            BUF_LOCK.acquire(blocking=True)
-            BUF += line
-            BUF_LOCK.release()
-
-
-class TxHandler(socketserver.StreamRequestHandler):
-    def handle(self) -> None:
-        global BUF
-        line = ""
-        while True:
-            BUF_LOCK.acquire(blocking=True)
-            for i, ch in enumerate(BUF):
-                line += ch
-                if ch == "\n":
-                    BUF = BUF[i + 1 :]
-                    break
-            else:  # A full line in buffer isn't available.
-                BUF_LOCK.release()
-                time.sleep(0.2)
-                continue
-            BUF_LOCK.release()
-            self.wfile.write(line.encode("utf-8"))
+            if line:
+                lock.lock(filepath=self.buffer_file_path)
+                with self.buffer_file_path.open("a", encoding="utf-8") as fh:
+                    fh.write(line)
+                lock.unlock(self.buffer_file_path)
+            else:
+                time.sleep(0.5)
 
 
 def serve():
