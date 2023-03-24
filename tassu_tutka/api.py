@@ -14,9 +14,13 @@ def read_item() -> dict[str, list[str]]:
     lock.lock(buffer_file_path)
     with open(buffer_file_path, "r") as fh:
         lines = fh.readlines()
+    with open(buffer_file_path, "w") as fh:
+        pass
     lock.unlock(buffer_file_path)
     return {"lines": lines}
 
 
-def run():
-    uvicorn.run(app, host="0.0.0.0", port=8000, workers=0, loop="none")
+def run(options):
+    uvicorn.run(
+        app, host=options.api_addr, port=int(options.api_port), workers=0, loop="none"
+    )

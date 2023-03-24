@@ -1,3 +1,4 @@
+import argparse
 import os
 import logging
 import threading
@@ -58,25 +59,24 @@ class RxHandler(socketserver.StreamRequestHandler):
                 time.sleep(0.5)
 
 
-def serve():
+def serve(options):
     import signal
+    import tassu_tutka.api as tassapi
 
     _add_pid_to_pidfile()
 
+    # Starting socket server for GPS device.
     logging.info("Starting Rx server in port 65000... Waiting for a GPS device.")
-    rx = socketserver.TCPServer(("0.0.0.0", 65000), RxHandler)
+    print(options.gps_listener_addr, int(options.gps_listener_port))
+    rx = socketserver.TCPServer(
+        (options.gps_listener_addr, int(options.gps_listener_port)), RxHandler
+    )
     t_rx = threading.Thread(group=None, target=rx.serve_forever)
     t_rx.start()
 
-    # logging.info("Starting Tx server in port 64999...")
-    # tx = socketserver.TCPServer(("0.0.0.0", 64999), TxHandler)
-    # t_tx = threading.Thread(group=None, target=tx.serve_forever)
-    # t_tx.start()
-
-    import tassu_tutka.api as tassapi
-
+    # Starting client api.
     logging.info("Starting client API.")
-    t_api = threading.Thread(group=None, target=tassapi.run)
+    t_api = threading.Thread(group=None, target=tassapi.run, args=(options,))
     t_api.daemon = True
     t_api.start()
 

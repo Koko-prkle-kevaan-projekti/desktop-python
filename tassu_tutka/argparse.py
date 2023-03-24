@@ -63,30 +63,26 @@ def parse() -> argparse.Namespace:
     server_sock = server_cmd.add_argument_group("Address and port configuration")
     server_sock.add_argument(
         "--gps-listener-addr",
-        nargs=1,
         action="store",
         default="0.0.0.0",
         help="Address to listen to. Default=0.0.0.0",
     )
     server_sock.add_argument(
         "--gps-listener-port",
-        nargs=1,
         action="store",
         default=65000,
         help="TCP port to listen",
     )
     server_sock.add_argument(
         "--api-addr",
-        nargs=1,
         action="store",
         default="0.0.0.0",
         help="API service address. Default=0.0.0.0",
     )
     server_sock.add_argument(
         "--api-port",
-        nargs=1,
         action="store",
-        default=8000,
+        default="8000",
         help="API service port. Default=8000",
     )
 

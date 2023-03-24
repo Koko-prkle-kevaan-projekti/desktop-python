@@ -20,7 +20,7 @@ def start(options: argparse.Namespace):
         pid = os.fork()
         if pid:
             return
-    sr.serve()
+    sr.serve(options)
 
 
 def stop():
