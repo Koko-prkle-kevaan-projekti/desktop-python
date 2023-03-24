@@ -1,4 +1,5 @@
 import os
+import logging
 import threading
 import socketserver
 import time
@@ -67,12 +68,12 @@ def serve():
     import signal
     _add_pid_to_pidfile()
 
-    print("Starting Rx server in port 65000... Waiting for a GPS device.")
+    logging.info("Starting Rx server in port 65000... Waiting for a GPS device.")
     rx = socketserver.TCPServer(("0.0.0.0", 65000), RxHandler)
     t_rx = threading.Thread(group=None, target=rx.serve_forever)
     t_rx.start()
 
-    print("Starting Tx server in port 64999...")
+    logging.info("Starting Tx server in port 64999...")
     tx = socketserver.TCPServer(("0.0.0.0", 64999), TxHandler)
     t_tx = threading.Thread(group=None, target=tx.serve_forever)
     t_tx.start()
@@ -93,4 +94,4 @@ def serve():
     quit_ = functools.partial(quit_, rx, t_rx, tx, None)
     signal.signal(signal.SIGINT, quit_)
     signal.signal(signal.SIGHUP, quit_)
-    print("Server started.\nPress CTRL+C (SIGINT) or ttutka server command to stop.")
+    logging.info("Server started.\nPress CTRL+C (SIGINT) or ttutka server command to stop.")
