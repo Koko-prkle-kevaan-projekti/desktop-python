@@ -7,6 +7,7 @@ import sys
 import functools
 import tempfile
 import platform
+import tassu_tutka.error as error
 
 TX_PORT = 65000
 RX_PORT = 64999
@@ -16,7 +17,7 @@ BUF_LOCK = threading.Lock()
 
 def _add_pid_to_pidfile(pid: int | None = None):
     if "windows" in platform.platform().lower() :
-        return
+        raise error.WindowsError("Wrong os")
     if not pid:
         pid = os.getpid()
     home = os.getenv("HOME")

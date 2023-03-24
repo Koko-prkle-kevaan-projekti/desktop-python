@@ -5,10 +5,11 @@ import signal
 import os
 import argparse
 import time
+import pathlib
 import multiprocessing as mp
 import tassu_tutka.argparse as ap
 import tassu_tutka.server as sr
-from tassu_tutka.error import ServerError
+import tassu_tutka.error as error
 
 
 def start(options: argparse.Namespace):
@@ -24,17 +25,23 @@ def start(options: argparse.Namespace):
 
 def stop():
     if "windows" in platform.platform().lower():
-        print("This command is not usable in Windows.")
-        return
-    pids = sr._get_pids_from_pidfile()
+        raise error.WindowsError("This command is not usable in Windows.")
     try:
+        pids = sr._get_pids_from_pidfile()
         pid = pids[0]
         print(f"Sending SIGHUP to {pid}")
         os.kill(int(pid), signal.SIGHUP)
-    except IndexError as e:
+    except (
+        IndexError,
+        FileNotFoundError,
+    ) as e:  # reading pid can raise file not found.
         print("TassuTutka server isn't running..")
-    except AttributeError as e:
-        raise ServerError("Stopping a running server isn't supported on Windows.")
+    except ProcessLookupError as e:
+        print("TassuTutka server isn't running..")
+        print("Removing stale pidfile.")
+        pidfilep = pathlib.Path(f"{os.getenv('HOME')}/ttutka.pid")
+        if pidfilep.is_file():
+            os.unlink(pidfilep)
 
 
 def restart(options: argparse.Namespace):
@@ -43,7 +50,7 @@ def restart(options: argparse.Namespace):
         print("Sleeping 5secs... lol.")
         time.sleep(5)
         start(options)
-    except ServerError as e:
+    except error.WindowsError as e:
         print("Server restart isn't supported on Windows.")
 
 

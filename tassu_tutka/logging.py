@@ -1,9 +1,9 @@
-import argparse
+import tassu_tutka.error as error
 import logging
-import logging.config as config
+from logging import config
 
 
-def setup_logging(options: argparse.Namespace):
+def setup_logging(options: "tassu_tutka.argparse.Namespace"):
     f = options.log_file
     match options.log_level:
         case "debug":
@@ -17,4 +17,4 @@ def setup_logging(options: argparse.Namespace):
         case "critical":
             dbg = logging.CRITICAL
         case _:
-            raise Server
+            raise error.ServerError("Invalid log level")
