@@ -6,6 +6,7 @@ import time
 import sys
 import functools
 import tempfile
+import platform
 
 TX_PORT = 65000
 RX_PORT = 64999
@@ -14,6 +15,8 @@ BUF = ""
 BUF_LOCK = threading.Lock()
 
 def _add_pid_to_pidfile(pid: int | None = None):
+    if "windows" in platform.platform().lower() :
+        return
     if not pid:
         pid = os.getpid()
     home = os.getenv("HOME")
@@ -77,6 +80,12 @@ def serve():
     tx = socketserver.TCPServer(("0.0.0.0", 64999), TxHandler)
     t_tx = threading.Thread(group=None, target=tx.serve_forever)
     t_tx.start()
+
+    import tassu_tutka.api as tassapi
+    logging.info("Starting client API.")
+    t_api = threading.Thread(group=None, target=tassapi.run)
+    t_api.daemon = True
+    t_api.start()
 
     def quit_(
         a: socketserver.TCPServer,
