@@ -29,8 +29,8 @@ def parse() -> argparse.Namespace:
         nargs=1,
         choices=("start", "stop", "restart", "kill"),
         help=(
-            "Start, stop, restart or kill a server. Note that restart doesn't inherit" +
-            " options of previous process."
+            "Start, stop, restart or kill a server. Note that restart doesn't inherit"
+            + " options of previous process."
         ),
     )
     server_cmd.add_argument(
@@ -43,12 +43,11 @@ def parse() -> argparse.Namespace:
     logging_ = server_cmd.add_argument_group("Logging")
     logging_.add_argument(
         "--log-level",
-        nargs=1,
         choices=("debug", "info", "warning", "error", "critical"),
         action="store",
         help="Set the server logging level. Default=warning",
         default="warning",
-        dest="log_level"
+        dest="log_level",
     )
     logging_.add_argument(
         "--log-file",
@@ -56,7 +55,7 @@ def parse() -> argparse.Namespace:
         action="store",
         help="Path to the log file",
         default="/var/log/ttutka.log",
-        dest="log_file"
+        dest="log_file",
     )
 
     # Socket binding related opts.

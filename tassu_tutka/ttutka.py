@@ -10,9 +10,11 @@ import multiprocessing as mp
 import tassu_tutka.argparse as ap
 import tassu_tutka.server as sr
 import tassu_tutka.error as error
+import tassu_tutka.logging
 
 
 def start(options: argparse.Namespace):
+    tassu_tutka.logging.setup_logging(options)
     if options.daemon:
         if "windows" in platform.platform().lower():
             print("Windows does not have daemon processes.")

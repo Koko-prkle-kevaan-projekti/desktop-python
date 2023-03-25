@@ -22,5 +22,10 @@ def read_item() -> dict[str, list[str]]:
 
 def run(options):
     uvicorn.run(
-        app, host=options.api_addr, port=int(options.api_port), workers=0, loop="none"
+        app,
+        host=options.api_addr,
+        port=int(options.api_port),
+        workers=0,
+        loop="none",
+        log_config=None,
     )

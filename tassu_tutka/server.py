@@ -66,8 +66,7 @@ def serve(options):
     _add_pid_to_pidfile()
 
     # Starting socket server for GPS device.
-    logging.info("Starting Rx server in port 65000... Waiting for a GPS device.")
-    print(options.gps_listener_addr, int(options.gps_listener_port))
+    logging.info(f"Starting Rx server in port {options.gps_listener_port}. Waiting for a GPS device.")
     rx = socketserver.TCPServer(
         (options.gps_listener_addr, int(options.gps_listener_port)), RxHandler
     )
@@ -94,5 +93,6 @@ def serve(options):
     signal.signal(signal.SIGINT, quit_)
     signal.signal(signal.SIGHUP, quit_)
     logging.info(
-        "Server started.\nPress CTRL+C (SIGINT) or ttutka server command to stop."
+        "Use CTRL-C or send SIGHUP to terminate: `ttutka server stop`"
     )
+    t_api.join()
