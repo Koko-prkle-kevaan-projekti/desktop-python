@@ -8,15 +8,13 @@ import sys
 import functools
 import platform
 import pathlib
-import lock
+import queue
 import tassu_tutka.error as error
 
 _TX_PORT = 65000
-
+gps_events = queue.Queue()
 
 def _add_pid_to_pidfile(pid: int | None = None):
-    if "windows" in platform.platform().lower():
-        raise error.WindowsError("Wrong os")
     if not pid:
         pid = os.getpid()
     home = os.getenv("HOME")
@@ -51,10 +49,7 @@ class RxHandler(socketserver.StreamRequestHandler):
             # Write to locked file, if available.
             line = self.rfile.readline().decode("utf-8")
             if line:
-                lock.lock(filepath=self.buffer_file_path)
-                with self.buffer_file_path.open("a", encoding="utf-8") as fh:
-                    fh.write(line)
-                lock.unlock(self.buffer_file_path)
+                gps_events.put(line)
             else:
                 time.sleep(0.5)
 
@@ -63,7 +58,8 @@ def serve(options):
     import signal
     import tassu_tutka.api as tassapi
 
-    _add_pid_to_pidfile()
+    if "windows" not in platform.platform().lower():
+        _add_pid_to_pidfile()
 
     # Starting socket server for GPS device.
     logging.info(f"Starting Rx server in port {options.gps_listener_port}. Waiting for a GPS device.")
