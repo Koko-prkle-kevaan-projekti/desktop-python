@@ -87,7 +87,8 @@ def serve(options):
 
     quit_ = functools.partial(quit_, rx, t_rx)
     signal.signal(signal.SIGINT, quit_)
-    signal.signal(signal.SIGHUP, quit_)
+    if "windows" not in platform.platform().lower():
+        signal.signal(signal.SIGHUP, quit_)
     logging.info(
         "Use CTRL-C or send SIGHUP to terminate: `ttutka server stop`"
     )
