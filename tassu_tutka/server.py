@@ -1,5 +1,6 @@
 import os
 import logging
+import signal
 import threading
 import socketserver
 from socketserver import BaseRequestHandler, BaseServer
@@ -10,37 +11,12 @@ import pathlib
 from functools import partialmethod
 from typing import Any, Callable, Self
 
-class PidFileHandlerFunctions :
+from fastapi import APIRouter
 
-    @staticmethod
-    def _add_pid_to_pidfile(pid: int | None = None):
-        if not pid:
-            pid = os.getpid()
-        home = os.getenv("HOME")
-        with open(f"{home}/ttutka.pid", "w") as fh:
-            fh.write(f"{pid}\n")
-
-    @staticmethod
-    def _remove_pid_from_pidfile(pid: int | None = None):
-        if not pid:
-            pid = os.getpid()
-        home = os.getenv("HOME")
-        with open(f"{home}/ttutka.pid", "r") as fh:
-            pids = [x for x in fh.readlines() if x.strip() != str(pid)]
-        with open(f"{home}/ttutka.pid", "w") as fh:
-            fh.writelines(pids)
-
-    @staticmethod
-    def _get_pid_from_pidfile() -> int | None:
-        """Returns process pid when found, otherwise None.
-        """
-        home = os.getenv("HOME")
-        with open(f"{home}/ttutka.pid", "r") as fh:
-            try:
-                pid = int(fh.readline().strip())
-            except ValueError as e:
-                pid = None
-        return pid
+import tassu_tutka.api as tassapi
+import tassu_tutka.signals as signals
+from tassu_tutka.api import ClientApi
+from tassu_tutka import pidfile
 
 
 class MyTCPServer(socketserver.TCPServer):
@@ -96,18 +72,11 @@ class RxHandler(socketserver.StreamRequestHandler):
 
 
 def serve(options):
-    import signal
-    import tassu_tutka.api as tassapi
+    # Write process pid to the pid file.
+    pidfile.PidFileHandlerFunctions.add_pid_to_pidfile()
 
-    if "windows" not in platform.platform().lower():
-        PidFileHandlerFunctions._add_pid_to_pidfile()
-
-    # Starting client api.
     logging.info("Starting client API.")
-    api = tassapi.ClientApi(options)
-    t_api = threading.Thread(group=None, target=api.run_forevaa)
-    t_api.daemon = True
-    t_api.start()
+    api = tassapi.ClientApi(options) # api can thread itself.
 
     # Starting socket server for GPS device.
     logging.info(
@@ -118,22 +87,18 @@ def serve(options):
         RxHandler,
         extra_args_for_handler=(api.push_to_queue,),
     )
-    t_rx = threading.Thread(group=None, target=rx.serve_forever)
-    t_rx.start()
+    rx_t = threading.Thread(group=None, target=rx.serve_forever)
 
-    def quit_(
-        a: socketserver.TCPServer,
-        a_thread: threading.Thread,
-        sig,
-        frame,
-    ):
-        a.shutdown()
-        a.server_close()
-        PidFileHandlerFunctions._remove_pid_from_pidfile()
+    # Start the threads.
+    rx_t.start()
 
-    quit_ = functools.partial(quit_, rx, t_rx)
-    signal.signal(signal.SIGINT, quit_)
-    if "windows" not in platform.platform().lower():
-        signal.signal(signal.SIGHUP, quit_)
+    # Register signal handlers after starting threads.
+    should_quit = []
+    signals.register_signal_handlers((rx, rx_t), should_quit)
+
     logging.info("Use CTRL-C or send SIGHUP to terminate: `ttutka server stop`")
-    t_api.join()
+    with api.run_in_thread():
+        while not should_quit:
+            time.sleep(0.3)
+        pidfile.PidFileHandlerFunctions.remove_pid_from_pidfile()
+        time.sleep(0.3)

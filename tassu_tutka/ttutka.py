@@ -7,6 +7,7 @@ import argparse
 import time
 import pathlib
 import multiprocessing as mp
+from tassu_tutka import pidfile
 import tassu_tutka.argparse as ap
 import tassu_tutka.server as sr
 import tassu_tutka.error as error
@@ -29,7 +30,7 @@ def stop():
     if "windows" in platform.platform().lower():
         raise error.WindowsError("This command is not usable in Windows.")
     try:
-        pid = sr.PidFileHandlerFunctions._get_pid_from_pidfile()
+        pid = pidfile.PidFileHandlerFunctions.get_pid_from_pidfile()
         print(f"Sending SIGHUP to {pid}")
         if pid:
             os.kill(pid, signal.SIGHUP)
