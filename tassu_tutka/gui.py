@@ -1,3 +1,4 @@
+import datetime
 import tkinter
 from tkinter import ttk
 from tkinter.constants import *
@@ -48,11 +49,13 @@ class MenuBar(tkinter.Menu):
         self.add_cascade(label="Tiedosto", menu=file_menu)
 
         info_menu = tkinter.Menu(self, tearoff=0)
-        info_menu.add_command(label="Epälisenssi", command=lambda: InfoDialog(
-            parent,
-            title="Epälisenssi",
-            height=25,
-            info_content="""
+        info_menu.add_command(
+            label="Epälisenssi",
+            command=lambda: InfoDialog(
+                parent,
+                title="Epälisenssi",
+                height=25,
+                info_content="""
 This is free and unencumbered software released into the public domain.
 
 Anyone is free to copy, modify, publish, use, compile, sell, or distribute
@@ -74,8 +77,9 @@ ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 For more information, please refer to <http://unlicense.org/>
-            """
-        ))
+            """,
+            ),
+        )
         info_menu.add_command(
             label="Tietoa",
             command=lambda: InfoDialog(
@@ -101,7 +105,7 @@ class MainWindow(ttk.Frame):
         self.file_name = tkinter.StringVar(self)
         self.file_name.set("Tiedostoa ei ole valittu")
         file_label = ttk.Label(self, textvariable=self.file_name, border=5)
-        file_label.grid(column=0, row=0, columnspan=4)
+        file_label.grid(column=0, row=0, columnspan=5)
 
         # File types for open file dialog.
         ft = (("GPS datatiedostot", "*.gdat"), ("Kaikki tiedostot", "*.*"))
@@ -118,21 +122,31 @@ class MainWindow(ttk.Frame):
             )
 
         # Them buttons
-        self.read_file = ttk.Button(self, text="Avaa tiedosto...", command=read_file)
-        self.read_file.grid(column=0, row=1, sticky="ew")
-        draw_route = ttk.Button(self, text="Piirrä reitti").grid(
-            column=1, row=1, sticky="ew"
-        )
+        # self.read_file = ttk.Button(self, text="Avaa tiedosto...", command=read_file)
+        # self.read_file.grid(column=0, row=1, sticky="ew")
+        # draw_route = ttk.Button(self, text="Piirrä reitti").grid(
+        #    column=1, row=1, sticky="ew"
+        # )
         satellite_view = ttk.Button(
             self, text="Satelliittikartta", command=self.set_satellite_view
-        ).grid(sticky="ew", column=2, row=1)
-        satellite_view = ttk.Button(
+        ).grid(sticky="ew", column=0, columnspan=2, row=1)
+        openstreetmap_view = ttk.Button(
             self, text="Open Street map", command=self.set_normal_view
-        ).grid(column=3, row=1, sticky="ew")
+        ).grid(column=2, row=1, columnspan=2, sticky="ew")
+
+        pause_or_cont = ttk.Button(self, text="Tauota tai jatka")
+        pause_or_cont.grid(column=5, row=0, sticky="ew")
+        chosen_file = ttk.Button(self, text="Valitse tiedosto")
+        chosen_file.grid(column=5, row=1, sticky="ew")
+
+        lb = tkinter.Listbox(self)
+        lb.grid(column=5, row=2, rowspan=20, sticky="ns")
+
+        lb.insert(0, str(datetime.datetime.now()))
 
         self.map = tkm.TkinterMapView(self, width=1200, height=900)
         self.map.set_position(65.0612111, 25.4681883)
-        self.map.grid(column=0, row=2, columnspan=4)
+        self.map.grid(column=0, row=2, rowspan=3, columnspan=4)
         self.grid()
 
     def set_normal_view(self):
