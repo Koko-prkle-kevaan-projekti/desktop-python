@@ -36,8 +36,11 @@ class PidFileHandlerFunctions :
         """
         home = os.getenv("HOME")
         with open(f"{home}/ttutka.pid", "r") as fh:
-            pids = fh.readline().strip()
-        return pids
+            try:
+                pid = int(fh.readline().strip())
+            except ValueError as e:
+                pid = None
+        return pid
 
 
 class MyTCPServer(socketserver.TCPServer):

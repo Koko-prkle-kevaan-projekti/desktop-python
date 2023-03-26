@@ -29,15 +29,12 @@ def stop():
     if "windows" in platform.platform().lower():
         raise error.WindowsError("This command is not usable in Windows.")
     try:
-        pids = sr._get_pids_from_pidfile()
-        pid = pids[0]
+        pid = sr.PidFileHandlerFunctions._get_pid_from_pidfile()
         print(f"Sending SIGHUP to {pid}")
-        os.kill(int(pid), signal.SIGHUP)
-    except (
-        IndexError,
-        FileNotFoundError,
-    ) as e:  # reading pid can raise file not found.
-        print("TassuTutka server isn't running..")
+        if pid:
+            os.kill(pid, signal.SIGHUP)
+        else:
+            print("No pid file found. Maybe the server isn't running?")
     except ProcessLookupError as e:
         print("TassuTutka server isn't running..")
         print("Removing stale pidfile.")
