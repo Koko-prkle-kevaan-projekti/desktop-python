@@ -1,18 +1,15 @@
-import argparse
 import os
 import logging
 import threading
 import socketserver
+from socketserver import BaseRequestHandler, BaseServer
 import time
-import sys
 import functools
 import platform
 import pathlib
-import queue
-import tassu_tutka.error as error
+from functools import partialmethod
+from typing import Any, Callable, Self
 
-_TX_PORT = 65000
-gps_events = queue.Queue()
 
 def _add_pid_to_pidfile(pid: int | None = None):
     if not pid:
@@ -39,17 +36,54 @@ def _get_pids_from_pidfile():
     return pids
 
 
+class MyTCPServer(socketserver.TCPServer):
+    def __init__(
+        self,
+        server_address: tuple[str, int],
+        RequestHandlerClass: Callable,
+        bind_and_activate: bool = True,
+        extra_args_for_handler: tuple[Any] | None = None,
+    ) -> None:
+        """Extended __init__() from TCPServer
+
+        Args:
+            server_address (tuple[str, int]): A tuple containing ip-address and port.
+            RequestHandlerClass (Callable):
+                    The handle must take as many extra args as the extra_args_for_handler
+                    tuple has members.
+            bind_and_activate (bool, optional): Same as superclass. Defaults to True.
+            extra_args_for_handler (tuple[Any] | None, optional): _description_. Defaults to None.
+        """
+        super().__init__(
+            server_address,
+            RequestHandlerClass,
+            bind_and_activate,
+        )
+        self._extra = extra_args_for_handler
+
+    def finish_request(self, request, client_address) -> None:
+        """Overridden version with extra args."""
+        print(self._extra)
+        self.RequestHandlerClass(request, client_address, self, *self._extra)
+
+
 class RxHandler(socketserver.StreamRequestHandler):
-    buffer_file_path = pathlib.Path("/tmp/ttutka.tmp")
+    def __init__(
+        self,
+        request,
+        client_address,
+        server: BaseServer,
+        extra: Callable[[str], None],
+    ) -> None:
+        self._line_cb = extra
+        super().__init__(request, client_address, server)
 
     def handle(self) -> None:
-        if not self.buffer_file_path.exists():
-            self.buffer_file_path.touch(mode=0o600, exist_ok=False)
         while True:
-            # Write to locked file, if available.
             line = self.rfile.readline().decode("utf-8")
             if line:
-                gps_events.put(line)
+                print(self)
+                self._line_cb(line)
             else:
                 time.sleep(0.5)
 
@@ -61,19 +95,24 @@ def serve(options):
     if "windows" not in platform.platform().lower():
         _add_pid_to_pidfile()
 
+    # Starting client api.
+    logging.info("Starting client API.")
+    api = tassapi.ClientApi(options)
+    t_api = threading.Thread(group=None, target=api.run_forevaa)
+    t_api.daemon = True
+    t_api.start()
+
     # Starting socket server for GPS device.
-    logging.info(f"Starting Rx server in port {options.gps_listener_port}. Waiting for a GPS device.")
-    rx = socketserver.TCPServer(
-        (options.gps_listener_addr, int(options.gps_listener_port)), RxHandler
+    logging.info(
+        f"Starting Rx server in port {options.gps_listener_port}. Waiting for a GPS device."
+    )
+    rx = MyTCPServer(
+        (options.gps_listener_addr, int(options.gps_listener_port)),
+        RxHandler,
+        extra_args_for_handler=(api.push_to_queue,),
     )
     t_rx = threading.Thread(group=None, target=rx.serve_forever)
     t_rx.start()
-
-    # Starting client api.
-    logging.info("Starting client API.")
-    t_api = threading.Thread(group=None, target=tassapi.run, args=(options,))
-    t_api.daemon = True
-    t_api.start()
 
     def quit_(
         a: socketserver.TCPServer,
@@ -89,7 +128,5 @@ def serve(options):
     signal.signal(signal.SIGINT, quit_)
     if "windows" not in platform.platform().lower():
         signal.signal(signal.SIGHUP, quit_)
-    logging.info(
-        "Use CTRL-C or send SIGHUP to terminate: `ttutka server stop`"
-    )
+    logging.info("Use CTRL-C or send SIGHUP to terminate: `ttutka server stop`")
     t_api.join()

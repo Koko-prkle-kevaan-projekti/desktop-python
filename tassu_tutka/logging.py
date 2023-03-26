@@ -1,9 +1,10 @@
 import tassu_tutka.error as error
 import logging
-from logging import config, basicConfig
+from logging import basicConfig
+import argparse
 
 
-def setup_logging(options: "tassu_tutka.argparse.Namespace"):
+def setup_logging(options: "argparse.Namespace"):
     f = options.log_file
     print(options.log_level)
     match options.log_level:
