@@ -10,30 +10,34 @@ import pathlib
 from functools import partialmethod
 from typing import Any, Callable, Self
 
+class PidFileHandlerFunctions :
 
-def _add_pid_to_pidfile(pid: int | None = None):
-    if not pid:
-        pid = os.getpid()
-    home = os.getenv("HOME")
-    with open(f"{home}/ttutka.pid", "a+") as fh:
-        fh.write(f"{pid}\n")
+    @staticmethod
+    def _add_pid_to_pidfile(pid: int | None = None):
+        if not pid:
+            pid = os.getpid()
+        home = os.getenv("HOME")
+        with open(f"{home}/ttutka.pid", "w") as fh:
+            fh.write(f"{pid}\n")
 
+    @staticmethod
+    def _remove_pid_from_pidfile(pid: int | None = None):
+        if not pid:
+            pid = os.getpid()
+        home = os.getenv("HOME")
+        with open(f"{home}/ttutka.pid", "r") as fh:
+            pids = [x for x in fh.readlines() if x.strip() != str(pid)]
+        with open(f"{home}/ttutka.pid", "w") as fh:
+            fh.writelines(pids)
 
-def _remove_pid_from_pidfile(pid: int | None = None):
-    if not pid:
-        pid = os.getpid()
-    home = os.getenv("HOME")
-    with open(f"{home}/ttutka.pid", "r") as fh:
-        pids = [x for x in fh.readlines() if x.strip() != str(pid)]
-    with open(f"{home}/ttutka.pid", "w") as fh:
-        fh.writelines(pids)
-
-
-def _get_pids_from_pidfile():
-    home = os.getenv("HOME")
-    with open(f"{home}/ttutka.pid", "r") as fh:
-        pids = [x.strip() for x in fh.readlines()]
-    return pids
+    @staticmethod
+    def _get_pid_from_pidfile() -> int | None:
+        """Returns process pid when found, otherwise None.
+        """
+        home = os.getenv("HOME")
+        with open(f"{home}/ttutka.pid", "r") as fh:
+            pids = fh.readline().strip()
+        return pids
 
 
 class MyTCPServer(socketserver.TCPServer):
@@ -93,7 +97,7 @@ def serve(options):
     import tassu_tutka.api as tassapi
 
     if "windows" not in platform.platform().lower():
-        _add_pid_to_pidfile()
+        PidFileHandlerFunctions._add_pid_to_pidfile()
 
     # Starting client api.
     logging.info("Starting client API.")
@@ -122,7 +126,7 @@ def serve(options):
     ):
         a.shutdown()
         a.server_close()
-        _remove_pid_from_pidfile()
+        PidFileHandlerFunctions._remove_pid_from_pidfile()
 
     quit_ = functools.partial(quit_, rx, t_rx)
     signal.signal(signal.SIGINT, quit_)
