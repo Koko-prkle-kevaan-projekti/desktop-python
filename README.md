@@ -8,5 +8,5 @@ Asenna ensin python tulkki osoitteesta [python.org](https://python.org). Asennuk
 aikana huomaa lisätä raksi ruutuun, että tulkin sijainti lisätään PATH
 ympäristömuuttujaan. Asennuksen jälkeen avaa powershell, ja kirjoita powershellissä
 komento `pip install git+https://github.com/Koko-prkle-kevaan-projekti/desktop-python`
-Noin. Nyt ohjelma pitäisi pystyä ajamaan komennolla `ttassu.exe --gui` tai
-`ttassu.exe -h`.
+Noin. Nyt ohjelma pitäisi pystyä ajamaan komennolla `ttutka.exe client gui` tai
+`ttutka.exe -h`.
