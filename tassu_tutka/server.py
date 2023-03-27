@@ -9,7 +9,7 @@ import functools
 import platform
 import pathlib
 from functools import partialmethod
-from typing import Any, Callable, Self
+from typing import Any, Callable
 
 from fastapi import APIRouter
 
@@ -101,4 +101,3 @@ def serve(options):
         while not should_quit:
             time.sleep(0.3)
         pidfile.PidFileHandlerFunctions.remove_pid_from_pidfile()
-        time.sleep(0.3)

@@ -1,0 +1,8 @@
+FROM alpine
+WORKDIR /app
+COPY . /app/
+RUN apk add --update --no-cache py-pip
+RUN pip install -r requirements.txt
+CMD ["python", "-m", "tassu_tutka.ttutka", "server", "start"]
+EXPOSE 8000
+EXPOSE 65000
