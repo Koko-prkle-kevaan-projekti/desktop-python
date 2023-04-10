@@ -19,7 +19,7 @@ from tassu_tutka.api import ClientApi
 from tassu_tutka import pidfile
 
 
-class MyTCPServer(socketserver.TCPServer):
+class MyTCPServer(socketserver.ThreadingTCPServer):
     def __init__(
         self,
         server_address: tuple[str, int],
