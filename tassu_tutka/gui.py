@@ -1,18 +1,37 @@
 import datetime
 import tkinter
+from threading import Lock
 from tkinter import ttk
 from tkinter.constants import *
 from tkinter import filedialog
 import io
 import tkintermapview as tkm
 
+from tassu_tutka import client
+
+UPDATE_INTERVAL = 1500
+
+_RMC_MESSAGES = []
+_CLIENT = client.Requester()
+
+
+def read_messages(mw: "MainWindow"):
+    _CLIENT.mkrequest()
+    _RMC_MESSAGES.extend(_CLIENT.get_responses())
+    mw.clear_lb()
+    for msg in _RMC_MESSAGES:
+        mw.add_lb_entry(str(msg))
+    mw.after(UPDATE_INTERVAL, read_messages, mw)
+
 
 def user_interface():
+
     tk = tkinter.Tk()
     tk.title("TassuTutka")
     mw = MainWindow(tk)
     menu_bar = MenuBar(tk)
     tk.config(menu=menu_bar)
+    tk.after(UPDATE_INTERVAL, read_messages, mw)
     tk.mainloop()
 
 
@@ -139,15 +158,21 @@ class MainWindow(ttk.Frame):
         chosen_file = ttk.Button(self, text="Valitse tiedosto")
         chosen_file.grid(column=5, row=1, sticky="ew")
 
-        lb = tkinter.Listbox(self)
-        lb.grid(column=5, row=2, rowspan=20, sticky="ns")
-
-        lb.insert(0, str(datetime.datetime.now()))
+        self.lb = tkinter.Listbox(self)
+        for i, item in enumerate(_RMC_MESSAGES):
+            self.lb.insert(i, str(item))
+        self.lb.grid(column=5, row=2, rowspan=20, sticky="ns")
 
         self.map = tkm.TkinterMapView(self, width=1200, height=900)
         self.map.set_position(65.0612111, 25.4681883)
         self.map.grid(column=0, row=2, rowspan=3, columnspan=4)
         self.grid()
+
+    def add_lb_entry(self, entry):
+        self.lb.insert(self.lb.size()+1, str(entry))
+    
+    def clear_lb(self):
+        self.lb.delete(1, self.lb.size()+1)
 
     def set_normal_view(self):
         self.map.set_tile_server("https://a.tile.openstreetmap.org/{z}/{x}/{y}.png")

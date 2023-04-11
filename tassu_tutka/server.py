@@ -1,13 +1,8 @@
-import os
 import logging
-import signal
 import threading
 import socketserver
 from socketserver import BaseRequestHandler, BaseServer
 import time
-import functools
-import platform
-import pathlib
 from functools import partialmethod
 from typing import Any, Callable
 
@@ -65,7 +60,6 @@ class RxHandler(socketserver.StreamRequestHandler):
         while True:
             line = self.rfile.readline().decode("utf-8")
             if line:
-                print(self)
                 self._line_cb(line)
             else:
                 time.sleep(0.5)
@@ -76,7 +70,7 @@ def serve(options):
     pidfile.PidFileHandlerFunctions.add_pid_to_pidfile()
 
     logging.info("Starting client API.")
-    api = tassapi.ClientApi(options) # api can thread itself.
+    api = tassapi.ClientApi(options)  # api can thread itself.
 
     # Starting socket server for GPS device.
     logging.info(
