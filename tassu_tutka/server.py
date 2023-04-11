@@ -41,7 +41,6 @@ class MyTCPServer(socketserver.ThreadingTCPServer):
 
     def finish_request(self, request, client_address) -> None:
         """Overridden version with extra args."""
-        print(self._extra)
         self.RequestHandlerClass(request, client_address, self, *self._extra)
 
 

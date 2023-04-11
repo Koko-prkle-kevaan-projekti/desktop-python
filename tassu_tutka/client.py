@@ -7,7 +7,7 @@ import queue
 import httpx
 from threading import Thread, Lock
 
-import tassu_tutka.nmea
+import tassu_tutka.nmea as nmea
 
 
 
@@ -68,6 +68,12 @@ class Requester:
         while not self._responses.empty():
             val = self._responses.get()
             print(val)
-            ret.extend([x.strip() for x in val])
+            sentences = []
+            for raw_sentence in val:
+                try:
+                    sentences.append(nmea.Sentence(raw_sentence))
+                except nmea.UnknownSentence as e:
+                    pass
+            ret.extend(sentences)
 
         return ret

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Literal, Union, Dict, Any
+from typing import Literal, Self, Union, Dict, Any
 from abc import ABC
 import re
 import sys
@@ -8,6 +8,7 @@ import sys
 class UnknownSentence(Exception):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
 
 class Sentence:
     """Sentence is either a GGA or RMC sentence from GPS.
@@ -40,7 +41,8 @@ class Sentence:
         GGA_ALTITUDE
     """
 
-    _re = re.compile(r"""
+    _re = re.compile(
+        r"""
             \$(?P<MSG_TYPE>GPRMC|GPGGA),
             (?P<MSG_TIME>\d{6}\.\d{3}),
             (?P<RMC_SIGNAL_STATUS>A|V)?,? # Only in RMC
@@ -57,43 +59,43 @@ class Sentence:
                 (?P<GGA_NUM_SATELLITES>\d+),
                 (?P<GGA_HORIZONTAL_DILUTION>\d+\.\d*),
                 (?P<GGA_ALTITUDE>\-?\d+\.\d*),
-            )(?P<MSG_IGNORED_FIELDS>.*)$""", re.VERBOSE)
+            )(?P<MSG_IGNORED_FIELDS>.*)$""",
+        re.VERBOSE,
+    )
 
     def __init__(self, raw_sentence: str):
         self.raw = raw_sentence.strip()
-        self.sentence: dict|None = self._process(self.raw)
+        self.sentence: dict | None = self._process(self.raw)
 
     def _convert_gps_degrees_to_decimal(
-            self,
-            degminsec: str, 
-            hemisphere: Literal["N", "E", "S", "W"]) -> float:
-
-        minutes = degminsec[degminsec.index(".") - 2:]
-        degrees = degminsec[:degminsec.index(".") - 2]
+        self, degminsec: str, hemisphere: Literal["N", "E", "S", "W"]
+    ) -> float:
+        minutes = degminsec[degminsec.index(".") - 2 :]
+        degrees = degminsec[: degminsec.index(".") - 2]
 
         # Convert to numeric and decimal.
-        mp = -1 if hemisphere in "SW" else 1 # Multiplier to change sign.
+        mp = -1 if hemisphere in "SW" else 1  # Multiplier to change sign.
         deg = int(degrees)
         deg += float(minutes) / 60
         deg *= mp
         return deg
-    
-    def _process(self, raw: str) -> dict|None:
+
+    def _process(self, raw: str) -> dict | None:
         ret = self._re.match(raw)
         if not ret:
-            raise UnknownSentence("Didn't recognize the sentence.")
+            raise UnknownSentence("Can't process sentence.")
         ret = ret.groupdict()
         if ret["MSG_TYPE"] == "GPRMC":
             speed_kmh = float(ret["RMC_SPEED"]) * 1.852
-            ret["RMC_SPEED_KMH"] = speed_kmh 
-        
+            ret["RMC_SPEED_KMH"] = speed_kmh
+
         ret["MSG_LONGITUDE"] = self._convert_gps_degrees_to_decimal(
-            ret["MSG_LONGITUDE_GPS"],
-            ret["MSG_LONGITUDAL_HEMISPHERE"])
+            ret["MSG_LONGITUDE_GPS"], ret["MSG_LONGITUDAL_HEMISPHERE"]
+        )
         ret["MSG_LATTITUDE"] = self._convert_gps_degrees_to_decimal(
-            ret["MSG_LATTITUDE_GPS"],
-            ret["MSG_LATTITUDAL_HEMISPHERE"])
+            ret["MSG_LATTITUDE_GPS"], ret["MSG_LATTITUDAL_HEMISPHERE"]
+        )
         return ret
-        
+
     def __getitem__(self, item) -> Any:
         return self.sentence[item]
