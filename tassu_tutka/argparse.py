@@ -14,12 +14,8 @@ def parse() -> argparse.Namespace:
         choices=("gui", "mkrequest"),
         help="Launch user interface or make an api request.",
     )
-    client_cmd.add_argument("--ifile", action="store", help="Path to GPS .dat file.")
-    client_cmd.add_argument(
-        "--ofile",
-        action="store",
-        help="Path to GeoJSON output file. Optional. Defaults to stdout.",
-    )
+    client_cmd.add_argument("--server-address", action="store", help="Server address will be saved to ~/.ttutka.dotenv")
+    client_cmd.add_argument("--server-port", action="store", help="Server port will be saved to ~/.ttutka.dotenv")
 
     # Server stuff
     server_cmd = subcommands.add_parser("server", add_help=True, help="Server options.")

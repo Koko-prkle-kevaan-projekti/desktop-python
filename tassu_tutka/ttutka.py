@@ -7,10 +7,12 @@ import argparse
 import time
 import pathlib
 import multiprocessing as mp
+
 from tassu_tutka import pidfile
 import tassu_tutka.argparse as ap
 import tassu_tutka.server as sr
 import tassu_tutka.error as error
+from tassu_tutka.settings import Settings
 import tassu_tutka.logging
 
 
@@ -70,11 +72,25 @@ def force_kill():
 
 def main():
     options = ap.parse()
-    print(options)
+    #print(options)
 
     # Client selected
     if "gui" in options.cmd:
         import tassu_tutka.gui as gui
+
+        try:
+            Settings.save_settings(
+                SERVER_ADDR=options.server_address,
+                SERVER_PORT=options.server_port
+            )
+        except AttributeError as e:
+            Settings.load_settings()
+            if not os.getenv("SERVER_ADDR") or not os.getenv("SERVER_PORT"):
+                print("Need server address and port on first start. They will be saved for later use.",
+                      "See `ttutka client -h` for more info.", sep="\n")
+                return
+        finally:
+            Settings.load_settings()
 
         gui.user_interface()
 
