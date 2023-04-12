@@ -13,21 +13,24 @@ from tassu_tutka import client
 UPDATE_INTERVAL = 1500
 
 _RMC_MESSAGES = deque()
+_LISTBOX_ITEMS = deque()
 _CLIENT = client.Requester()
 
 
-def read_messages(mw: "MainWindow"):
+def read_messages(main_window: "MainWindow"):
     _CLIENT.mkrequest()
     for coord in _CLIENT.get_responses():
         _RMC_MESSAGES.appendleft(coord)
-    mw.clear_lb()
-    for msg in _RMC_MESSAGES:
+
+    while _RMC_MESSAGES:
+        msg = _RMC_MESSAGES.pop()
+        _LISTBOX_ITEMS.appendleft(msg)
         entry: datetime = msg["MSG_DATETIME"]
         str_entry = (
-            f"{entry.day}.{entry.month} {entry.hour}:{entry.minute}:{entry.second}"
+            f"{entry.day}.{entry.month}. {entry.hour}:{entry.minute}:{entry.second}"
         )
-        mw.add_lb_entry(str(str_entry))
-    mw.after(UPDATE_INTERVAL, read_messages, mw)
+        main_window.add_lb_entry(str(str_entry))
+    main_window.after(UPDATE_INTERVAL, read_messages, main_window)
 
 
 
@@ -106,24 +109,24 @@ class MainWindow(ttk.Frame):
         super().__init__(parent, borderwidth=2, relief=RIDGE)
 
         # Text showing selected file.
-        self.file_name = tkinter.StringVar(self)
-        self.file_name.set("Tiedostoa ei ole valittu")
-        file_label = ttk.Label(self, textvariable=self.file_name, border=5)
-        file_label.grid(column=0, row=0, columnspan=5)
-
-        # File types for open file dialog.
-        ft = (("GPS datatiedostot", "*.gdat"), ("Kaikki tiedostot", "*.*"))
-        self._file: io.TextIOWrapper | None = None
-
-        def read_file() -> None:
-            if self.file:
-                self.file.close()
-            self.file = filedialog.askopenfile(
-                title="Avaa tiedosto", initialdir="~", filetypes=ft
-            )
-            self.file_name.set(self.file.name) if self.file else self.file_name.set(
-                "Tiedostoa ei ole valittu"
-            )
+        # self.file_name = tkinter.StringVar(self)
+        # self.file_name.set("Tiedostoa ei ole valittu")
+        # file_label = ttk.Label(self, textvariable=self.file_name, border=5)
+        # file_label.grid(column=0, row=0, columnspan=5)
+        # 
+        # # File types for open file dialog.
+        # ft = (("GPS datatiedostot", "*.gdat"), ("Kaikki tiedostot", "*.*"))
+        # self._file: io.TextIOWrapper | None = None
+        # 
+        # def read_file() -> None:
+        #     if self.file:
+        #         self.file.close()
+        #     self.file = filedialog.askopenfile(
+        #         title="Avaa tiedosto", initialdir="~", filetypes=ft
+        #     )
+        #     self.file_name.set(self.file.name) if self.file else self.file_name.set(
+        #         "Tiedostoa ei ole valittu"
+        #     )
 
         # Them buttons
         # self.read_file = ttk.Button(self, text="Avaa tiedosto...", command=read_file)
@@ -133,17 +136,17 @@ class MainWindow(ttk.Frame):
         # )
         satellite_view = ttk.Button(
             self, text="Satelliittikartta", command=self.set_satellite_view
-        ).grid(sticky="ew", column=0, columnspan=2, row=1)
+        ).grid(sticky="ew", column=0, columnspan=2, row=1, ipadx=10, ipady=10)
         openstreetmap_view = ttk.Button(
             self, text="Open Street map", command=self.set_normal_view
-        ).grid(column=2, row=1, columnspan=2, sticky="ew")
+        ).grid(column=2, row=1, columnspan=2, sticky="ew", ipadx=10, ipady=10)
 
-        center = ttk.Button(
+        center_latest = ttk.Button(
             self, text="Keskitä viimeisimpään", command=self.center_map_to_last_position
         )
-        center.grid(column=5, row=0, sticky="ew")
-        chosen_file = ttk.Button(self, text="Valitse tiedosto")
-        chosen_file.grid(column=5, row=1, sticky="ew")
+        center_latest.grid(column=5, row=0, sticky="ew", rowspan=2, ipadx=10, ipady=10)
+        # center_chosen = ttk.Button(self, text="Valitse tiedosto")
+        # center_chosen.grid(column=5, row=1, sticky="ew")
 
         self.lb = tkinter.Listbox(self)
         for i, item in enumerate(_RMC_MESSAGES):
@@ -162,9 +165,9 @@ class MainWindow(ttk.Frame):
         """
         try:
             self.set_map_position(
-                _RMC_MESSAGES[0]["MSG_LATTITUDE"],
-                _RMC_MESSAGES[0]["MSG_LONGITUDE"],
-                "Latest",
+                _LISTBOX_ITEMS[0]["MSG_LATTITUDE"],
+                _LISTBOX_ITEMS[0]["MSG_LONGITUDE"],
+                "Viimeisin",
                 True,
             )
         except IndexError as e:
@@ -176,7 +179,7 @@ class MainWindow(ttk.Frame):
     def add_lb_entry(self, entry):
         self.lb.insert(self.lb.size() + 1, str(entry))
 
-    def clear_lb(self):
+    def clear_listbox(self):
         self.lb.delete(1, self.lb.size() + 1)
 
     def set_normal_view(self):
