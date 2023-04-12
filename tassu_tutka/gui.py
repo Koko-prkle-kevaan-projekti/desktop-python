@@ -36,7 +36,7 @@ def read_messages(main_window: "MainWindow"):
 
 def user_interface():
     tk = tkinter.Tk()
-    tk.title("TassuTutka")
+    tk.title("TussuTutka")
     mw = MainWindow(tk)
     menu_bar = MenuBar(tk)
     tk.config(menu=menu_bar)
@@ -93,7 +93,7 @@ class MenuBar(tkinter.Menu):
                 parent,
                 title="Info",
                 info_content="""
-TassuTutka on neljän opiskelijan koira-GPS -projekti. Tämä ohjelma on projektin
+TassuTutka on neljän pippelin koira-GPS -projekti. Tämä ohjelma on projektin
 työpöytäympäristöön tarkoitettu ohjelma, joka tulkitsee ja näyttää GPS-laitteelta
 saatavaa dataa. Projektissa mukana: Mikko Kujala, Rebecca Soisenniemi, Nico Hertolin
 sekä Pasi Puhakka.
