@@ -6,7 +6,7 @@ def read(fname):
 
 setup(
     name = "TassuTutka",
-    version = "0.0.7",
+    version = "0.0.8",
     author = "Mikko Kujala",
     author_email = "m.kujala@live.com",
     description = ("TassuTutka -project's desktop app."),
@@ -46,6 +46,6 @@ setup(
     classifiers=[
         "Development Status :: 1 - Pre-Alpha",
         "Topic :: Utilities",
-        "License :: OSI Approved :: Unlicense",
+        "License :: Unlicense",
     ],
 )

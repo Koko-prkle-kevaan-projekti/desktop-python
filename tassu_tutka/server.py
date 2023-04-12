@@ -6,15 +6,13 @@ import time
 from functools import partialmethod
 from typing import Any, Callable
 
-from fastapi import APIRouter
-
 import tassu_tutka.api as tassapi
 import tassu_tutka.signals as signals
 from tassu_tutka.api import ClientApi
 from tassu_tutka import pidfile
 
 
-class MyTCPServer(socketserver.TCPServer):
+class MyTCPServer(socketserver.ThreadingTCPServer):
     def __init__(
         self,
         server_address: tuple[str, int],

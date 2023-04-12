@@ -44,7 +44,7 @@ class Sentence:
     _re = re.compile(
         r"""
             \$(?P<MSG_TYPE>GPRMC|GPGGA),
-            (?P<MSG_TIME>\d{6}\.\d{3}),
+            (?P<MSG_TIME>\d{6}\.\d+),
             (?P<RMC_SIGNAL_STATUS>A|V)?,? # Only in RMC
             (?P<MSG_LATTITUDE_GPS>\d+\.\d+),
             (?P<MSG_LATTITUDAL_HEMISPHERE>N|S),
@@ -84,17 +84,42 @@ class Sentence:
         ret = self._re.match(raw)
         if not ret:
             raise UnknownSentence("Can't process sentence.")
+
+        # Speed to km/h
         ret = ret.groupdict()
         if ret["MSG_TYPE"] == "GPRMC":
             speed_kmh = float(ret["RMC_SPEED"]) * 1.852
             ret["RMC_SPEED_KMH"] = speed_kmh
 
+        # Minutes and seconds to decimal.
         ret["MSG_LONGITUDE"] = self._convert_gps_degrees_to_decimal(
             ret["MSG_LONGITUDE_GPS"], ret["MSG_LONGITUDAL_HEMISPHERE"]
         )
         ret["MSG_LATTITUDE"] = self._convert_gps_degrees_to_decimal(
             ret["MSG_LATTITUDE_GPS"], ret["MSG_LATTITUDAL_HEMISPHERE"]
         )
+
+        # Time string to datetime
+        from datetime import datetime, UTC
+
+        date = ret["RMC_DATE"][:2]
+        month = ret["RMC_DATE"][2:4]
+        year = ret["RMC_DATE"][4:]
+
+        hour = ret["MSG_TIME"][:2]
+        minute = ret["MSG_TIME"][2:4]
+        second = ret["MSG_TIME"][4:6]
+
+        ret["MSG_DATETIME"] = datetime(
+            int(year),
+            int(month),
+            int(date),
+            int(hour),
+            int(minute),
+            int(second),
+            tzinfo=UTC,
+        )
+
         return ret
 
     def __getitem__(self, item) -> Any:

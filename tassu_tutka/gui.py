@@ -1,5 +1,5 @@
 from collections import deque
-import datetime
+from datetime import datetime
 import tkinter
 from threading import Lock
 from tkinter import ttk
@@ -22,17 +22,13 @@ def read_messages(mw: "MainWindow"):
         _RMC_MESSAGES.appendleft(coord)
     mw.clear_lb()
     for msg in _RMC_MESSAGES:
-        mw.add_lb_entry(str(msg))
-    try:
-        mw.set_map_position(
-            _RMC_MESSAGES[0]["MSG_LATTITUDE"],
-            _RMC_MESSAGES[0]["MSG_LONGITUDE"],
-            "Latest",
-            True,
+        entry: datetime = msg["MSG_DATETIME"]
+        str_entry = (
+            f"{entry.day}.{entry.month} {entry.hour}:{entry.minute}:{entry.second}"
         )
-    except IndexError as e:
-        pass
+        mw.add_lb_entry(str(str_entry))
     mw.after(UPDATE_INTERVAL, read_messages, mw)
+
 
 
 def user_interface():
@@ -142,8 +138,10 @@ class MainWindow(ttk.Frame):
             self, text="Open Street map", command=self.set_normal_view
         ).grid(column=2, row=1, columnspan=2, sticky="ew")
 
-        pause_or_cont = ttk.Button(self, text="Tauota tai jatka")
-        pause_or_cont.grid(column=5, row=0, sticky="ew")
+        center = ttk.Button(
+            self, text="Keskitä viimeisimpään", command=self.center_map_to_last_position
+        )
+        center.grid(column=5, row=0, sticky="ew")
         chosen_file = ttk.Button(self, text="Valitse tiedosto")
         chosen_file.grid(column=5, row=1, sticky="ew")
 
@@ -156,6 +154,21 @@ class MainWindow(ttk.Frame):
         self.map.set_position(65.0612111, 25.4681883)
         self.map.grid(column=0, row=2, rowspan=3, columnspan=4)
         self.grid()
+
+    def center_map_to_last_position(self):
+        """Callback for the button to center map.
+
+        Do nothing, if no data has been received.
+        """
+        try:
+            self.set_map_position(
+                _RMC_MESSAGES[0]["MSG_LATTITUDE"],
+                _RMC_MESSAGES[0]["MSG_LONGITUDE"],
+                "Latest",
+                True,
+            )
+        except IndexError as e:
+            pass
 
     def set_map_position(self, deg_x, deg_y, text=None, marker=True):
         self.map.set_position(deg_x, deg_y, text, marker)
