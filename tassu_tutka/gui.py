@@ -115,7 +115,8 @@ class MainWindow(ttk.Frame):
         satellite_view.grid(sticky="ew", column=0, columnspan=2, row=1, ipadx=10, ipady=10)
         openstreetmap_view = ttk.Button(
             self, text="Karttanäkymä", command=self.set_normal_view
-        ).grid(column=2, row=1, columnspan=2, sticky="ew", ipadx=10, ipady=10)
+        )
+        openstreetmap_view.grid(column=2, row=1, columnspan=2, sticky="ew", ipadx=10, ipady=10)
 
         center_latest = ttk.Button(
             self, text="Viimeisin sijainti", command=self.center_map_to_last_position
