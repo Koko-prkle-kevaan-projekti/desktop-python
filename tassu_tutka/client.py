@@ -1,11 +1,8 @@
-from asyncio import threads
 import json
-import re
-from typing import Any
 import os
 import queue
 import httpx
-from threading import Thread, Lock
+from threading import Thread
 
 import tassu_tutka.nmea as nmea
 

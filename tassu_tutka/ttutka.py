@@ -1,4 +1,3 @@
-import sys
 import logging
 import platform
 import signal
@@ -6,7 +5,6 @@ import os
 import argparse
 import time
 import pathlib
-import multiprocessing as mp
 
 from tassu_tutka import pidfile
 import tassu_tutka.argparse as ap

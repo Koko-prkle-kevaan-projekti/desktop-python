@@ -1,4 +1,3 @@
-from typing import Any
 import os
 import dotenv
 from tassu_tutka import error

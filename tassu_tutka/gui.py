@@ -1,11 +1,8 @@
 from collections import deque
 from datetime import datetime
 import tkinter
-from threading import Lock
 from tkinter import ttk
 from tkinter.constants import *
-from tkinter import filedialog
-import io
 import tkintermapview as tkm
 
 from tassu_tutka import client

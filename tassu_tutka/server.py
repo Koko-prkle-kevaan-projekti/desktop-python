@@ -3,12 +3,10 @@ import threading
 import socketserver
 from socketserver import BaseRequestHandler, BaseServer
 import time
-from functools import partialmethod
 from typing import Any, Callable
 
 import tassu_tutka.api as tassapi
 import tassu_tutka.signals as signals
-from tassu_tutka.api import ClientApi
 from tassu_tutka import pidfile
 
 

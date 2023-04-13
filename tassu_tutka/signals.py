@@ -3,7 +3,6 @@ import threading
 import signal
 import functools
 from typing import List
-from tassu_tutka.api import ClientApi
 from socketserver import TCPServer
 
 
