@@ -1,16 +1,17 @@
 from collections import deque
-from datetime import datetime
+from datetime import datetime, timedelta
 import tkinter
 from tkinter import ttk
 from tkinter.constants import *
 import tkintermapview as tkm
 
 from tassu_tutka import client
+from tassu_tutka.nmea import Sentence
 
 UPDATE_INTERVAL = 1500
 
 _RMC_MESSAGES = deque()
-_LISTBOX_ITEMS = deque()
+_LISTBOX_ITEMS: deque[Sentence] = deque()
 _CLIENT = client.Requester()
 
 
@@ -28,7 +29,6 @@ def read_messages(main_window: "MainWindow"):
         )
         main_window.add_lb_entry(str(str_entry))
     main_window.after(UPDATE_INTERVAL, read_messages, main_window)
-
 
 
 def user_interface():
@@ -105,55 +105,42 @@ class MainWindow(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent, borderwidth=2, relief=RIDGE)
 
-        # Text showing selected file.
-        # self.file_name = tkinter.StringVar(self)
-        # self.file_name.set("Tiedostoa ei ole valittu")
-        # file_label = ttk.Label(self, textvariable=self.file_name, border=5)
-        # file_label.grid(column=0, row=0, columnspan=5)
-        # 
-        # # File types for open file dialog.
-        # ft = (("GPS datatiedostot", "*.gdat"), ("Kaikki tiedostot", "*.*"))
-        # self._file: io.TextIOWrapper | None = None
-        # 
-        # def read_file() -> None:
-        #     if self.file:
-        #         self.file.close()
-        #     self.file = filedialog.askopenfile(
-        #         title="Avaa tiedosto", initialdir="~", filetypes=ft
-        #     )
-        #     self.file_name.set(self.file.name) if self.file else self.file_name.set(
-        #         "Tiedostoa ei ole valittu"
-        #     )
-
-        # Them buttons
-        # self.read_file = ttk.Button(self, text="Avaa tiedosto...", command=read_file)
-        # self.read_file.grid(column=0, row=1, sticky="ew")
-        # draw_route = ttk.Button(self, text="Piirrä reitti").grid(
-        #    column=1, row=1, sticky="ew"
-        # )
         satellite_view = ttk.Button(
             self, text="Satelliittikartta", command=self.set_satellite_view
-        ).grid(sticky="ew", column=0, columnspan=2, row=1, ipadx=10, ipady=10)
+        )
+        satellite_view.grid(sticky="ew", column=0, columnspan=2, row=1, ipadx=10, ipady=10)
         openstreetmap_view = ttk.Button(
             self, text="Open Street map", command=self.set_normal_view
-        ).grid(column=2, row=1, columnspan=2, sticky="ew", ipadx=10, ipady=10)
+        )
+        openstreetmap_view.grid(column=2, row=1, columnspan=2, sticky="ew", ipadx=10, ipady=10)
 
         center_latest = ttk.Button(
             self, text="Keskitä viimeisimpään", command=self.center_map_to_last_position
         )
         center_latest.grid(column=5, row=0, sticky="ew", rowspan=2, ipadx=10, ipady=10)
-        # center_chosen = ttk.Button(self, text="Valitse tiedosto")
-        # center_chosen.grid(column=5, row=1, sticky="ew")
 
-        self.lb = tkinter.Listbox(self)
+        self.listbox = tkinter.Listbox(self, selectmode=SINGLE)
+        self.listbox.bind('<<ListboxSelect>>', self.set_map_position_listbox_cb)
         for i, item in enumerate(_RMC_MESSAGES):
-            self.lb.insert(i, str(item))
-        self.lb.grid(column=5, row=2, rowspan=20, sticky="ns")
+            self.listbox.insert(i, str(item))
+        self.listbox.grid(column=5, row=2, rowspan=20, sticky="ns")
 
         self.map = tkm.TkinterMapView(self, width=1200, height=900)
         self.map.set_position(65.0612111, 25.4681883)
         self.map.grid(column=0, row=2, rowspan=3, columnspan=4)
         self.grid()
+
+    def set_map_position_listbox_cb(self, event):
+        print(event)
+        print(dir(event))
+        selection = self.listbox.curselection()
+        sentence = _LISTBOX_ITEMS[selection[0]]
+        self.set_map_position(
+            sentence.sentence["MSG_LATTITUDE"],
+            sentence.sentence["MSG_LONGITUDE"],
+            "",
+            True
+        )
 
     def center_map_to_last_position(self):
         """Callback for the button to center map.
@@ -170,14 +157,26 @@ class MainWindow(ttk.Frame):
         except IndexError as e:
             pass
 
+    def set_map_position_with_time_given(self, time: datetime, td: timedelta = timedelta(seconds=1)):
+        """Set map position to first item in _LISTBOX_ITEMS which is within the threshold of td.
+        """
+        for item in _LISTBOX_ITEMS:
+            if not (time - td < item.sentence["MSG_DATETIME"] < time + td):
+                self.set_map_position(
+                    item.sentence["MSG_LATTITUDE"],
+                    item.sentence["MSG_LONGITUDE"],
+                    text=time,
+                    marker=True
+                )
+
     def set_map_position(self, deg_x, deg_y, text=None, marker=True):
         self.map.set_position(deg_x, deg_y, text, marker)
 
     def add_lb_entry(self, entry):
-        self.lb.insert(self.lb.size() + 1, str(entry))
+        self.listbox.insert(self.listbox.size() + 1, str(entry))
 
     def clear_listbox(self):
-        self.lb.delete(1, self.lb.size() + 1)
+        self.listbox.delete(1, self.listbox.size() + 1)
 
     def set_normal_view(self):
         self.map.set_tile_server("https://a.tile.openstreetmap.org/{z}/{x}/{y}.png")
