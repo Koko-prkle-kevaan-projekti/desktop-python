@@ -1,8 +1,12 @@
 from collections import deque
 from datetime import datetime, timedelta
 import tkinter
+from threading import Lock
 from tkinter import ttk
 from tkinter.constants import *
+from tkinter import filedialog
+from tkinter.ttk import Style
+import io
 import tkintermapview as tkm
 
 from tassu_tutka import client
@@ -33,7 +37,7 @@ def read_messages(main_window: "MainWindow"):
 
 def user_interface():
     tk = tkinter.Tk()
-    tk.title("TussuTutka")
+    tk.title("TassuTutka")
     mw = MainWindow(tk)
     menu_bar = MenuBar(tk)
     tk.config(menu=menu_bar)
@@ -90,7 +94,7 @@ class MenuBar(tkinter.Menu):
                 parent,
                 title="Info",
                 info_content="""
-TassuTutka on neljän pippelin koira-GPS -projekti. Tämä ohjelma on projektin
+TassuTutka on OAMK tieto- ja viestintätekniikan opiskelijoiden koira-GPS -projekti. Tämä ohjelma on projektin
 työpöytäympäristöön tarkoitettu ohjelma, joka tulkitsee ja näyttää GPS-laitteelta
 saatavaa dataa. Projektissa mukana: Mikko Kujala, Rebecca Soisenniemi, Nico Hertolin
 sekä Pasi Puhakka.
@@ -110,12 +114,11 @@ class MainWindow(ttk.Frame):
         )
         satellite_view.grid(sticky="ew", column=0, columnspan=2, row=1, ipadx=10, ipady=10)
         openstreetmap_view = ttk.Button(
-            self, text="Open Street map", command=self.set_normal_view
-        )
-        openstreetmap_view.grid(column=2, row=1, columnspan=2, sticky="ew", ipadx=10, ipady=10)
+            self, text="Karttanäkymä", command=self.set_normal_view
+        ).grid(column=2, row=1, columnspan=2, sticky="ew", ipadx=10, ipady=10)
 
         center_latest = ttk.Button(
-            self, text="Keskitä viimeisimpään", command=self.center_map_to_last_position
+            self, text="Viimeisin sijainti", command=self.center_map_to_last_position
         )
         center_latest.grid(column=5, row=0, sticky="ew", rowspan=2, ipadx=10, ipady=10)
 
