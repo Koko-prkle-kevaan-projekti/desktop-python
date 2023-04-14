@@ -16,6 +16,7 @@ def parse() -> argparse.Namespace:
     )
     client_cmd.add_argument("--server-address", action="store", help="Server address will be saved to ~/.ttutka.dotenv")
     client_cmd.add_argument("--server-port", action="store", help="Server port will be saved to ~/.ttutka.dotenv")
+    client_cmd.add_argument("--infile", action="store", help="Input file.")
 
     # Server stuff
     server_cmd = subcommands.add_parser("server", add_help=True, help="Server options.")

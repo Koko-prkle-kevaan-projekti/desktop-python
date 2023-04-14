@@ -7,3 +7,4 @@ build*
 dist*
 *.egg-info
 todo.md
+rmc_log.txt

@@ -1,16 +1,12 @@
 from collections import deque
 from datetime import datetime, timedelta
 import tkinter
-from threading import Lock
 from tkinter import ttk
 from tkinter.constants import *
-from tkinter import filedialog
-from tkinter.ttk import Style
-import io
 import tkintermapview as tkm
 
 from tassu_tutka import client
-from tassu_tutka.nmea import Sentence
+from tassu_tutka.nmea import Sentence, UnknownSentence
 
 UPDATE_INTERVAL = 1500
 
@@ -19,29 +15,42 @@ _LISTBOX_ITEMS: deque[Sentence] = deque()
 _CLIENT = client.Requester()
 
 
-def read_messages(main_window: "MainWindow"):
-    _CLIENT.mkrequest()
-    for coord in _CLIENT.get_responses():
-        _RMC_MESSAGES.appendleft(coord)
+def read_messages(main_window: "MainWindow", try_connect=True):
+    if try_connect:
+        _CLIENT.mkrequest()
+        for coord in _CLIENT.get_responses():
+            _RMC_MESSAGES.appendleft(coord)
 
-    while _RMC_MESSAGES:
-        msg = _RMC_MESSAGES.pop()
+    for i, msg in enumerate(_RMC_MESSAGES):
+        main_window.map.delete_all_marker()
+        main_window.add_lb_entry(i, msg)
         _LISTBOX_ITEMS.appendleft(msg)
-        entry: datetime = msg["MSG_DATETIME"]
-        str_entry = (
-            f"{entry.day}.{entry.month}. {entry.hour}:{entry.minute}:{entry.second}"
-        )
-        main_window.add_lb_entry(str(str_entry))
-    main_window.after(UPDATE_INTERVAL, read_messages, main_window)
+
+    if _LISTBOX_ITEMS:
+        main_window.map.set_path([(x["MSG_LATTITUDE"], x["MSG_LONGITUDE"]) for x in _LISTBOX_ITEMS])
+    _RMC_MESSAGES.clear()
+
+    main_window.after(UPDATE_INTERVAL, read_messages, main_window, try_connect)
 
 
-def user_interface():
+def user_interface(data: list[str]|None = None):
+    try_connect = True
+    if data:
+        try_connect = False
+        for entry in data:
+            entry = entry.strip()
+            try:
+                sentence = Sentence(entry)
+            except UnknownSentence as e:
+                continue
+            _RMC_MESSAGES.appendleft(sentence)
+
     tk = tkinter.Tk()
     tk.title("TassuTutka")
     mw = MainWindow(tk)
     menu_bar = MenuBar(tk)
     tk.config(menu=menu_bar)
-    tk.after(UPDATE_INTERVAL, read_messages, mw)
+    tk.after(UPDATE_INTERVAL, read_messages, mw, try_connect)
     tk.mainloop()
 
 
@@ -125,8 +134,6 @@ class MainWindow(ttk.Frame):
 
         self.listbox = tkinter.Listbox(self, selectmode=SINGLE)
         self.listbox.bind('<<ListboxSelect>>', self.set_map_position_listbox_cb)
-        for i, item in enumerate(_RMC_MESSAGES):
-            self.listbox.insert(i, str(item))
         self.listbox.grid(column=5, row=2, rowspan=20, sticky="ns")
 
         self.map = tkm.TkinterMapView(self, width=1200, height=900)
@@ -134,9 +141,9 @@ class MainWindow(ttk.Frame):
         self.map.grid(column=0, row=2, rowspan=3, columnspan=4)
         self.grid()
 
-    def set_map_position_listbox_cb(self, event):
-        print(event)
-        print(dir(event))
+    def set_map_position_listbox_cb(self, event: tkinter.Event):
+        event.widget: tkinter.Listbox
+        selection = event.widget.selection_get()
         selection = self.listbox.curselection()
         sentence = _LISTBOX_ITEMS[selection[0]]
         self.set_map_position(
@@ -173,11 +180,13 @@ class MainWindow(ttk.Frame):
                     marker=True
                 )
 
-    def set_map_position(self, deg_x, deg_y, text=None, marker=True):
+    def set_map_position(self, deg_x, deg_y, text=None, marker=True, clear_old_markers=True):
+        if clear_old_markers:
+            self.map.delete_all_marker()
         self.map.set_position(deg_x, deg_y, text, marker)
 
-    def add_lb_entry(self, entry):
-        self.listbox.insert(self.listbox.size() + 1, str(entry))
+    def add_lb_entry(self, index, entry):
+        self.listbox.insert(index, entry)
 
     def clear_listbox(self):
         self.listbox.delete(1, self.listbox.size() + 1)

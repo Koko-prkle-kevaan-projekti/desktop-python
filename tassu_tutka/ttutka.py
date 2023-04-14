@@ -26,6 +26,14 @@ def start(options: argparse.Namespace):
     sr.serve(options)
 
 
+def read_file(path: pathlib.Path|str):
+    ret = []
+    with open(path, "r") as fh:
+        for line in fh:
+            ret.append(line)
+    return ret
+
+
 def stop():
     if "windows" in platform.platform().lower():
         raise error.WindowsError("This command is not usable in Windows.")
@@ -70,11 +78,17 @@ def force_kill():
 
 def main():
     options = ap.parse()
-    #print(options)
+    print(options)
 
     # Client selected
     if "gui" in options.cmd:
         import tassu_tutka.gui as gui
+
+        file_contents: list[str]|None = None
+        try:
+            file_contents = read_file(options.infile)
+        except TypeError as e:
+            pass  # Do nothing, as no infile was specified.
 
         try:
             Settings.save_settings(
@@ -90,7 +104,7 @@ def main():
         finally:
             Settings.load_settings()
 
-        gui.user_interface()
+        gui.user_interface(file_contents)
 
     # Server selected
     elif "start" in options.cmd:

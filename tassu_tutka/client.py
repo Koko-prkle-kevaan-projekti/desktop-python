@@ -64,7 +64,6 @@ class Requester:
         ret = []
         while not self._responses.empty():
             val = self._responses.get()
-            print(val)
             sentences = []
             for raw_sentence in val:
                 try:

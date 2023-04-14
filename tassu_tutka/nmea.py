@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Literal, Any
 import re
 
@@ -63,6 +64,10 @@ class Sentence:
     def __init__(self, raw_sentence: str):
         self.raw = raw_sentence.strip()
         self.sentence: dict | None = self._process(self.raw)
+
+    def __str__(self):
+        dt: datetime = self["MSG_DATETIME"]
+        return f"{dt.day}.{dt.month}.{dt.year}  {dt.hour}:{dt.minute}:{dt.second}"
 
     def _convert_gps_degrees_to_decimal(
         self, degminsec: str, hemisphere: Literal["N", "E", "S", "W"]
