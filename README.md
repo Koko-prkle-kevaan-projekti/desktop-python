@@ -5,10 +5,11 @@ ja työpöytäohjelmat.
 
 ## Asennus
 
-Asenna ensin python tulkki osoitteesta [python.org](https://python.org). Asennuksen
-aikana huomaa lisätä raksi ruutuun, jossa tulkin sijainti lisätään PATH
-ympäristömuuttujaan. Asennuksen jälkeen avaa PowerShell, ja kirjoita PowerShellissä
-komento `pip install git+https://github.com/Koko-prkle-kevaan-projekti/desktop-python`.
+Asenna ensin Python-tulkki osoitteesta [python.org](https://python.org). Ohjelma on
+kirjoitettu käyttäen Pythonin versiota 3.11.2. Asennuksen aikana huomaa lisätä raksi
+ruutuun, jossa tulkin sijainti lisätään PATH ympäristömuuttujaan. Asennuksen jälkeen
+avaa PowerShell, ja kirjoita PowerShellissä komento
+`pip install git+https://github.com/Koko-prkle-kevaan-projekti/desktop-python`.
 
 ## Käyttöönotto
 
@@ -16,7 +17,7 @@ Työpöytäohjelman pystyy ajamaan komennolla
 `ttutka.exe client --server-address <ip> --server-port <port> gui`. Ensimmäisellä
 käynnistyskerralla palvelimen osoite sekä portti tallennetaan, eikä kyseisiä vipuja
 tarvitse antaa enää seuraavilla käynnistyskerroilla. Serveriohjelman käynnistämisessä
-mahdollisiin vipuihin saa ohjeet komennolls `ttutka server -h`. Portit ja IP-osoitteet
+mahdollisiin vipuihin saa ohjeet komennolla `ttutka server -h`. Portit ja IP-osoitteet
 ovat vapaaehtoisia. Oletusportit ovat 65000 GPS-laitetta varten, sekä 8000
 työpöytäohjelmaa varten.
 
